@@ -20,21 +20,21 @@ def clean_text_with_mapping(text):
     j = 0  # index in cleaned text
     in_whitespace = False
     
-    # Process all content (including leading/trailing whitespace)
+    # Map the text to the cleaned text
     while i < len(text):
         if text[i].isspace():
             if not in_whitespace:
-                # First whitespace character - map to a single space
+                # Map the first whitespace character to a single space
                 cleaned.append(' ')
                 position_map[i] = j
                 j += 1
                 in_whitespace = True
             else:
-                # Subsequent whitespace - removed
+                # Remove subsequent whitespace characters
                 position_map[i] = None
             i += 1
         else:
-            # Non-whitespace character - keep it
+            # keep non-whitespace characters
             cleaned.append(text[i])
             position_map[i] = j
             j += 1
@@ -46,25 +46,23 @@ def clean_text_with_mapping(text):
 def map_position(original_pos, position_map):
     """
     Map an original position to cleaned position.
-    If the position was removed (whitespace), find the next valid position.
-    This handles cases where answer_start points to a collapsed whitespace.
+    If the position is removed, find the next valid position.
     """
     mapped = position_map.get(original_pos)
     if mapped is not None:
         return mapped
     
-    # If position was removed (whitespace), find the next valid position
+    # If the position is removed, find the next valid position
     for offset in range(1, min(10, len(position_map) - original_pos)):
         check_pos = original_pos + offset
         if position_map.get(check_pos) is not None:
             return position_map[check_pos]
     
-    # Should not happen with valid SQuAD data
-    raise ValueError(f"Could not map position {original_pos} to cleaned text")
+    return None
 
 # Process SQuAD data
 samples = []
-input_path = "raw/train-v1.1.json"
+input_path = "raw/dev-v1.1.json"
 
 with open(input_path, "r", encoding="utf-8") as f:
     data = json.load(f)
@@ -87,7 +85,7 @@ for article in data["data"]:
             })
 
 # Save processed data
-output_path = "data/processed/clean_squad_train.json"
+output_path = "data/processed/clean_squad_dev.json"
 output_dir = Path(output_path).parent
 output_dir.mkdir(parents=True, exist_ok=True)
 
