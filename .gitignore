@@ -95,3 +95,7 @@ paper/
 scripts/
 10701/
 
+# Docker
+.dockerignore
+Dockerfile
+
